@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"greenlight/internal/data"
 	"greenlight/internal/mailer"
+	"greenlight/internal/vcs"
 	"log/slog"
 	"os"
 	"strings"
@@ -15,7 +17,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const version = "1.0.0"
+var (
+	version = vcs.Version()
+)
 
 type config struct {
 	port int
@@ -76,7 +80,15 @@ func main() {
 		return nil
 	})
 
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	db, err := openDB(cfg)
